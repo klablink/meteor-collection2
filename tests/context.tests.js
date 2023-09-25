@@ -56,14 +56,14 @@ export default function addContextTests() {
   it('AutoValue Context', function (done) {
     let testId;
 
-    const callback1 = () => {
-      const ctx = contextCheck.findOne(testId);
+    const callback1 = async () => {
+      const ctx = await contextCheck.findOneAsync(testId);
       expect(ctx.context.docId).toBe(testId);
       done();
     };
 
-    const callback2 = () => {
-      const ctx = contextCheck.findOne(testId);
+    const callback2 = async () => {
+      const ctx = await contextCheck.findOneAsync(testId);
       expect(ctx.foo).toBe('bar');
       expect(ctx.context.isUpdate).toBe(true);
       expect(ctx.context.isInsert).toBe(false);
@@ -72,34 +72,37 @@ export default function addContextTests() {
       expect(ctx.context.isFromTrustedCode).toBe(!Meteor.isClient);
 
       // make sure docId works with `_id` direct, too
-      contextCheck.update(testId, {
+      await contextCheck.updateAsync(testId, {
         $set: {
           context: {},
           foo: "bar"
         }
-      }, callback1);
+      }).then(callback1);
     };
 
-    const callback3 = (error, result) => {
+    const callback3 = async (result) => {
       testId = result;
-      expect(!!error).toBe(false);
-      const ctx = contextCheck.findOne(testId);
+      const ctx = await contextCheck.findOneAsync(testId);
       expect(ctx.context.isInsert).toBe(true);
       expect(ctx.context.isUpdate).toBe(false);
       expect(ctx.context.userId).toBe(null);
       expect(ctx.context.docId).toBe(undefined);
       expect(ctx.context.isFromTrustedCode).toBe(!Meteor.isClient);
 
-      contextCheck.update({
+      contextCheck.updateAsync({
         _id: testId
       }, {
         $set: {
           context: {},
           foo: "bar"
         }
-      }, callback2);
+      }).then(callback2);
     };
 
-    contextCheck.insert({}, callback3);
+    contextCheck.insertAsync({})
+        .then(callback3)
+        .catch((error) => {
+            expect(!!error).toBe(false);
+        });
   });
 }

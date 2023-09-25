@@ -60,30 +60,30 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
   describe('autoValue on server', function () {
-    it('runs function once', function () {
-      const id = collection.insert({});
-      const doc = collection.findOne(id);
+    it('runs function once', async function () {
+      const id = await collection.insertAsync({});
+      const doc = await collection.findOneAsync(id);
       expect(doc.clientAV).toBe(undefined);
       expect(doc.serverAV).toBe(1);
     });
 
-    it('with getAutoValues false, does not run function', function () {
-      const id = collection.insert({}, { getAutoValues: false });
-      const doc = collection.findOne(id);
+    it('with getAutoValues false, does not run function', async function () {
+      const id = await collection.insertAsync({}, { getAutoValues: false });
+      const doc = await collection.findOneAsync(id);
       expect(doc.clientAV).toBe(undefined);
       expect(doc.serverAV).toBe(undefined);
     });
 
-    it('runs function once for LocalCollection', function () {
-      const id = localCollection.insert({});
-      const doc = localCollection.findOne(id);
+    it('runs function once for LocalCollection', async function () {
+      const id = await localCollection.insertAsync({});
+      const doc = await localCollection.findOneAsync(id);
       expect(doc.clientAV).toBe(undefined);
       expect(doc.serverAV).toBe(1);
     });
 
-    it('with getAutoValues false, does not run function for LocalCollection', function () {
-      const id = localCollection.insert({}, { getAutoValues: false });
-      const doc = localCollection.findOne(id);
+    it('with getAutoValues false, does not run function for LocalCollection', async function () {
+      const id = await localCollection.insertAsync({}, { getAutoValues: false });
+      const doc = await localCollection.findOneAsync(id);
       expect(doc.clientAV).toBe(undefined);
       expect(doc.serverAV).toBe(undefined);
     });

@@ -24,4 +24,4 @@ describe('cleanOptions', function () {
       Collection2.cleanOptions = cleanOptions;
       expect(Collection2.cleanOptions).toEqual(cleanOptions);
     });
-  }); 
+  });

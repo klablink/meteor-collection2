@@ -15,17 +15,16 @@ Npm.depends({
 });
 
 Package.onUse(function(api) {
-  api.versionsFrom(['1.12.1', '2.3']);
   api.use('mongo');
   api.imply('mongo');
   api.use('minimongo');
   api.use('ejson');
-  api.use('raix:eventemitter@1.0.0');
+  api.use('raix:eventemitter');
   api.use('ecmascript');
-  api.use('tmeasday:check-npm-versions@1.0.2');
+  api.use('tmeasday:check-npm-versions');
 
   // Allow us to detect 'insecure'.
-  api.use('insecure@1.0.7', {weak: true});
+  api.use('insecure', {weak: true});
 
   api.mainModule('collection2.js');
 

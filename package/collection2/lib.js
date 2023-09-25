@@ -1,5 +1,5 @@
 export function flattenSelector(selector) {
-  // If selector uses $and format, convert to plain object selector
+  // If the selector uses $and format, convert to plain object selector
   if (Array.isArray(selector.$and)) {
     selector.$and.forEach(sel => {
       Object.assign(selector, flattenSelector(sel));
@@ -26,6 +26,17 @@ export function flattenSelector(selector) {
       }
     }
   })
-  
+
   return obj
 }
+
+export const isInsertType = function (type) {
+  return ['insert', 'insertAsync'].includes(type);
+}
+export const isUpdateType = function (type) {
+  return ['update', 'updateAsync'].includes(type);
+}
+export const isUpsertType = function (type) {
+  return ['upsert', 'upsertAsync'].includes(type);
+}
+

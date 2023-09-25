@@ -5,3 +5,8 @@ node_modules
 npm-debug.log
 
 .idea/
+!*/package/meteor-browser-tests/
+/package/meteor-mocha-core/
+/package/meteor-mocha/
+/package/check-npm-versions/
+/package/Meteor-EventEmitter/

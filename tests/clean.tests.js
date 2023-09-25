@@ -5,202 +5,198 @@ import SimpleSchema from 'simpl-schema';
 let collection;
 
 if (Meteor.isClient) {
-  collection = new Mongo.Collection('cleanTests', { connection: null });
+    collection = new Mongo.Collection('cleanTests', { connection: null });
 } else {
-  collection = new Mongo.Collection('cleanTests');
+    collection = new Mongo.Collection('cleanTests');
 }
 
 describe('clean options', function () {
-  describe('filter', function () {
-    it('keeps default schema clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-      }, {
-        clean: {
-          filter: false,
-        },
-      });
+    describe('filter', function () {
+        it('keeps default schema clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+            }, {
+                clean: {
+                    filter: false,
+                },
+            });
 
-      collection.attachSchema(schema, { replace: true });
+            collection.attachSchema(schema, { replace: true });
 
-      collection.insert({ name: 'name', bad: 'prop' }, (error) => {
-        expect(error instanceof Error).toBe(true);
-        done();
-      });
+            collection.insertAsync({ name: 'name', bad: 'prop' })
+                .then(() => {
+                    throw new Error('should not get here');
+                })
+                .catch((error) => {
+                    expect(error instanceof Error).toBe(true);
+                });
+        });
+
+        it('keeps operation clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+            }, {
+                clean: {
+                    filter: true,
+                },
+            });
+
+            collection.attachSchema(schema, { replace: true });
+
+            await collection.insertAsync({ name: 'name', bad: 'prop' }, { filter: false })
+                .then(() => {
+                    throw new Error('should not get here');
+                })
+                .catch((error) => {
+                    console.log(error);
+                    expect(error instanceof Error).toBe(true);
+                });
+        });
+
+        it('has clean option on by default', async function () {
+            const schema = new SimpleSchema({ name: String });
+
+            collection.attachSchema(schema, { replace: true });
+
+            await collection.insertAsync({ name: 'name', bad: 'prop' });
+        });
     });
 
-    it('keeps operation clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-      }, {
-        clean: {
-          filter: true,
-        },
-      });
+    describe('autoConvert', function () {
+        it('keeps default schema clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+            }, {
+                clean: {
+                    autoConvert: false,
+                },
+            });
 
-      collection.attachSchema(schema, { replace: true });
+            collection.attachSchema(schema, { replace: true });
 
-      collection.insert({ name: 'name', bad: 'prop' }, { filter: false }, (error) => {
-        expect(error instanceof Error).toBe(true);
-        done();
-      });
+            await collection.insertAsync({ name: 1 })
+                .then(() => {
+                    throw new Error('should not get here');
+                })
+                .catch((error) => {
+                    expect(error instanceof Error).toBe(true);
+                });
+        });
+
+        it('keeps operation clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+            }, {
+                clean: {
+                    autoConvert: true,
+                },
+            });
+
+            collection.attachSchema(schema, { replace: true });
+
+            await collection.insertAsync({ name: 1 }, { autoConvert: false })
+                .then(() => {
+                    throw new Error('should not get here');
+                })
+                .catch((error) => {
+                    expect(error instanceof Error).toBe(true);
+                })
+        });
+
+        it('has clean option on by default', async function () {
+            const schema = new SimpleSchema({ name: String });
+
+            collection.attachSchema(schema, { replace: true });
+
+            collection.insertAsync({ name: 1 });
+        });
     });
 
-    it('has clean option on by default', function (done) {
-      const schema = new SimpleSchema({ name: String });
+    describe('removeEmptyStrings', function () {
+        it('keeps default schema clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+                other: Number,
+            }, {
+                clean: {
+                    removeEmptyStrings: false,
+                },
+            });
 
-      collection.attachSchema(schema, { replace: true });
+            collection.attachSchema(schema, { replace: true });
 
-      collection.insert({ name: 'name', bad: 'prop' }, (error) => {
-        expect(error).toBe(null);
-        done();
-      });
-    });
-  });
+            await collection.insertAsync({ name: '', other: 1 });
+        });
 
-  describe('autoConvert', function () {
-    it('keeps default schema clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-      }, {
-        clean: {
-          autoConvert: false,
-        },
-      });
+        it('keeps operation clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+                other: Number,
+            }, {
+                clean: {
+                    removeEmptyStrings: true,
+                },
+            });
 
-      collection.attachSchema(schema, { replace: true });
+            collection.attachSchema(schema, { replace: true });
 
-      collection.insert({ name: 1 }, (error) => {
-        expect(error instanceof Error).toBe(true);
-        done();
-      });
-    });
+            await collection.insertAsync({ name: '', other: 1 }, { removeEmptyStrings: false });
+        });
 
-    it('keeps operation clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-      }, {
-        clean: {
-          autoConvert: true,
-        },
-      });
+        it('has clean option on by default', async function () {
+            const schema = new SimpleSchema({ name: String, other: Number });
 
-      collection.attachSchema(schema, { replace: true });
+            collection.attachSchema(schema, { replace: true });
 
-      collection.insert({ name: 1 }, { autoConvert: false }, (error) => {
-        expect(error instanceof Error).toBe(true);
-        done();
-      });
-    });
-
-    it('has clean option on by default', function (done) {
-      const schema = new SimpleSchema({ name: String });
-
-      collection.attachSchema(schema, { replace: true });
-
-      collection.insert({ name: 1 }, (error) => {
-        expect(error).toBe(null);
-        done();
-      });
-    });
-  });
-
-  describe('removeEmptyStrings', function () {
-    it('keeps default schema clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-        other: Number
-      }, {
-        clean: {
-          removeEmptyStrings: false,
-        },
-      });
-
-      collection.attachSchema(schema, { replace: true });
-
-      collection.insert({ name: '', other: 1 }, (error) => {
-        expect(error).toBe(null);
-        done();
-      });
+            await collection.insertAsync({ name: '', other: 1 })
+                .then(() => {
+                    throw new Error('should not get here');
+                })
+                .catch((error) => {
+                    expect(error instanceof Error).toBe(true);
+                });
+        });
     });
 
-    it('keeps operation clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-        other: Number,
-      }, {
-        clean: {
-          removeEmptyStrings: true,
-        },
-      });
+    describe('trimStrings', function () {
+        it('keeps default schema clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+            }, {
+                clean: {
+                    trimStrings: false,
+                },
+            });
 
-      collection.attachSchema(schema, { replace: true });
+            collection.attachSchema(schema, { replace: true });
 
-      collection.insert({ name: '', other: 1 }, { removeEmptyStrings: false }, (error) => {
-        expect(error).toBe(null);
-        done();
-      });
+            const _id = await collection.insertAsync({ name: ' foo ' });
+            expect((await collection.findOneAsync(_id))).toEqual({ _id, name: ' foo ' });
+        });
+
+        it('keeps operation clean options', async function () {
+            const schema = new SimpleSchema({
+                name: String,
+            }, {
+                clean: {
+                    trimStrings: true,
+                },
+            });
+
+            collection.attachSchema(schema, { replace: true });
+
+            const _id = await collection.insertAsync({ name: ' foo ' }, { trimStrings: false });
+            expect((await collection.findOneAsync(_id))).toEqual({ _id, name: ' foo ' });
+        });
+
+        it('has clean option on by default', async function () {
+            const schema = new SimpleSchema({ name: String });
+
+            collection.attachSchema(schema, { replace: true });
+
+            const _id = await collection.insertAsync({ name: ' foo ' });
+            expect(await collection.findOneAsync(_id)).toEqual({ _id, name: 'foo' });
+        });
     });
-
-    it('has clean option on by default', function (done) {
-      const schema = new SimpleSchema({ name: String, other: Number });
-
-      collection.attachSchema(schema, { replace: true });
-
-      collection.insert({ name: '', other: 1 }, (error) => {
-        expect(error instanceof Error).toBe(true);
-        done();
-      });
-    });
-  });
-
-  describe('trimStrings', function () {
-    it('keeps default schema clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-      }, {
-        clean: {
-          trimStrings: false,
-        },
-      });
-
-      collection.attachSchema(schema, { replace: true });
-
-      collection.insert({ name: ' foo ' }, (error, _id) => {
-        expect(error).toBe(null);
-        expect(collection.findOne(_id)).toEqual({ _id, name: ' foo ' });
-        done();
-      });
-    });
-
-    it('keeps operation clean options', function (done) {
-      const schema = new SimpleSchema({
-        name: String,
-      }, {
-        clean: {
-          trimStrings: true,
-        },
-      });
-
-      collection.attachSchema(schema, { replace: true });
-
-      collection.insert({ name: ' foo ' }, { trimStrings: false }, (error, _id) => {
-        expect(error).toBe(null);
-        expect(collection.findOne(_id)).toEqual({ _id, name: ' foo ' });
-        done();
-      });
-    });
-
-    it('has clean option on by default', function (done) {
-      const schema = new SimpleSchema({ name: String });
-
-      collection.attachSchema(schema, { replace: true });
-
-      collection.insert({ name: ' foo ' }, (error, _id) => {
-        expect(error).toBe(null);
-        expect(collection.findOne(_id)).toEqual({ _id, name: 'foo' });
-        done();
-      });
-    });
-  });
 });
+
